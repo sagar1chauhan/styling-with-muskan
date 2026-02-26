@@ -21,8 +21,9 @@ export const CartProvider = ({ children }) => {
         return savedSlot ? JSON.parse(savedSlot) : null;
     });
     const [bookingType, setBookingType] = useState(() => {
-        return localStorage.getItem("bookingType") || "prebook";
+        return localStorage.getItem("bookingType") || "instant";
     });
+
 
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(cartItems));
@@ -36,6 +37,8 @@ export const CartProvider = ({ children }) => {
         localStorage.setItem("bookingType", bookingType);
     }, [bookingType]);
 
+
+
     const totalItems = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
     const totalPrice = cartItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
     const totalSavings = cartItems.reduce((total, item) => {
@@ -44,6 +47,21 @@ export const CartProvider = ({ children }) => {
         }
         return total;
     }, 0);
+
+    // Group items by serviceType (skin, hair, makeup) for Urban Company-style cart
+    const getGroupedItems = () => {
+        const groups = {};
+        const groupLabels = { skin: "🧴 Skin Services", hair: "💇 Hair Services", makeup: "💄 Makeup Services" };
+        cartItems.forEach(item => {
+            const type = item.serviceType || "other";
+            if (!groups[type]) {
+                groups[type] = { label: groupLabels[type] || "Other Services", items: [], subtotal: 0 };
+            }
+            groups[type].items.push(item);
+            groups[type].subtotal += item.price * (item.quantity || 1);
+        });
+        return groups;
+    };
 
     const addToCart = (service) => {
         setCartItems((prevItems) => {
@@ -91,6 +109,7 @@ export const CartProvider = ({ children }) => {
                 addToCart,
                 updateQuantity,
                 clearCart,
+                getGroupedItems,
             }}
         >
             {children}
