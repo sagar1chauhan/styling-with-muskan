@@ -1,13 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Star, Clock, ShieldCheck, Plus, Minus,
-  Calendar, ChevronRight, ShoppingCart, Zap, CalendarClock,
-  Settings2, Heart, Share2, Check, Timer, Sparkles, Camera
+  Calendar, ChevronRight, ShoppingCart,
+  Heart, Share2, Check, Timer, Sparkles, Camera,
+  UserCheck
 } from "lucide-react";
 import { Button } from "@/modules/user/components/ui/button";
-import { services } from "@/modules/user/data/services";
+import { services, mockProviders } from "@/modules/user/data/services";
 import { useGenderTheme } from "@/modules/user/contexts/GenderThemeContext";
 import { useCart } from "@/modules/user/contexts/CartContext";
 import { useAuth } from "@/modules/user/contexts/AuthContext";
@@ -16,56 +17,35 @@ import FloatingCart from "@/modules/user/components/salon/FloatingCart";
 import ExpressCheckout from "@/modules/user/components/salon/ExpressCheckout";
 import { shareContent } from "@/modules/user/lib/utils";
 
-const BOOKING_TYPES = [
-  {
-    id: "instant",
-    label: "Instant",
-    icon: Zap,
-    description: "Book now, get served within 60 minutes",
-    color: "from-amber-500 to-orange-500",
-    bgColor: "bg-amber-500/10",
-    textColor: "text-amber-500",
-    borderColor: "border-amber-500/30",
-  },
-  {
-    id: "prebook",
-    label: "Pre-Book",
-    icon: CalendarClock,
-    description: "Schedule for a future date & time slot",
-    color: "from-blue-500 to-cyan-500",
-    bgColor: "bg-blue-500/10",
-    textColor: "text-blue-500",
-    borderColor: "border-blue-500/30",
-  },
-  {
-    id: "customized",
-    label: "Customized",
-    icon: Settings2,
-    description: "Pick your own date, time & add-ons",
-    color: "from-purple-500 to-pink-500",
-    bgColor: "bg-purple-500/10",
-    textColor: "text-purple-500",
-    borderColor: "border-purple-500/30",
-  },
-];
-
 const ServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { gender } = useGenderTheme();
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart, setIsCartOpen, selectedSlot: globalSlot, setSelectedSlot: setGlobalSlot } = useCart();
   const { isLoggedIn, setIsLoginModalOpen } = useAuth();
   const service = services.find((s) => s.id === id);
 
   const [qty, setQty] = useState(1);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
-  const [bookingType, setBookingType] = useState("prebook");
   const { toggleWishlist, isInWishlist } = useWishlist();
   const isFav = isInWishlist(id);
   const [addedToCart, setAddedToCart] = useState(false);
   const stepsRef = useRef(null);
+
+  // Filter providers based on the service category/type
+  const availableProviders = useMemo(() => {
+    if (!service) return [];
+    return mockProviders.filter(p => p.specialties.includes(service.serviceType));
+  }, [service]);
+
+  useEffect(() => {
+    if (availableProviders.length > 0 && !selectedProvider) {
+      setSelectedProvider(availableProviders[0]);
+    }
+  }, [availableProviders, selectedProvider]);
 
   if (!service) {
     return (
@@ -97,7 +77,7 @@ const ServiceDetail = () => {
       return;
     }
 
-    if (bookingType !== "instant" && (!selectedDate || !selectedSlot)) {
+    if (!selectedDate || !selectedSlot) {
       alert("Please select a date and time slot first!");
       return;
     }
@@ -105,12 +85,15 @@ const ServiceDetail = () => {
     addToCart({
       ...service,
       price: service.price * qty,
-      bookingDetails: {
-        date: selectedDate,
-        slot: selectedSlot,
-        type: bookingType
-      }
     });
+
+    // Also update global slot if not set
+    setGlobalSlot({
+      date: selectedDate,
+      time: selectedSlot,
+      provider: selectedProvider
+    });
+
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -120,6 +103,7 @@ const ServiceDetail = () => {
       setIsLoginModalOpen(true);
       return;
     }
+    handleAddToCart();
     setIsCartOpen(true);
   };
 
@@ -432,186 +416,99 @@ const ServiceDetail = () => {
           </div>
         </motion.div>
 
-        {/* ===== SLOT BOOKING TYPES ===== */}
+        {/* ===== PROFESSIONAL SELECTION ===== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mt-5"
+          className="mt-6 space-y-6"
         >
-          <h3 className={`font-semibold text-base mb-4 px-1 flex items-center gap-2 ${gender === "women" ? "font-display" : "font-heading-men"}`}>
-            <Calendar className="w-5 h-5 text-primary" />
-            Choose Booking Type
-          </h3>
+          {/* Provider Selection */}
+          <div>
+            <h3 className={`font-semibold text-base mb-4 px-1 flex items-center gap-2 ${gender === "women" ? "font-display" : "font-heading-men"}`}>
+              <UserCheck className="w-5 h-5 text-primary" /> Choose Service Professional
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 px-1">
+              {availableProviders.map((provider) => (
+                <button
+                  key={provider.id}
+                  onClick={() => setSelectedProvider(provider)}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${selectedProvider?.id === provider.id
+                    ? "border-primary bg-primary/5 shadow-md scale-102"
+                    : "border-border glass-strong hover:border-primary/20"
+                    }`}
+                >
+                  <div className="relative flex-shrink-0">
+                    <img src={provider.image} className="w-14 h-14 rounded-xl object-cover" alt={provider.name} />
+                    {selectedProvider?.id === provider.id && (
+                      <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm truncate">{provider.name}</h4>
+                    <span className="text-[8px] font-black uppercase bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">
+                      {provider.tag}
+                    </span>
+                    <div className="flex items-center gap-2 mt-1 opacity-60">
+                      <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                      <span className="text-[10px] font-bold">{provider.rating}</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            {BOOKING_TYPES.map((type) => (
-              <motion.button
-                key={type.id}
-                onClick={() => setBookingType(type.id)}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className={`relative p-3 md:p-4 rounded-2xl text-center transition-all duration-300 border-2 ${bookingType === type.id
-                  ? `${type.borderColor} ${type.bgColor} shadow-lg`
-                  : "border-border glass-strong hover:border-muted-foreground/30"
-                  }`}
-              >
-                {bookingType === type.id && (
-                  <motion.div
-                    layoutId="booking-indicator"
-                    className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r ${type.color} flex items-center justify-center`}
-                  >
-                    <Check className="w-3 h-3 text-white" />
-                  </motion.div>
-                )}
-                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl mx-auto flex items-center justify-center mb-2 ${bookingType === type.id
-                  ? `bg-gradient-to-r ${type.color}`
-                  : "bg-accent"
-                  }`}>
-                  <type.icon className={`w-5 h-5 md:w-6 md:h-6 ${bookingType === type.id ? "text-white" : "text-muted-foreground"}`} />
-                </div>
-                <p className={`text-xs md:text-sm font-semibold ${bookingType === type.id ? type.textColor : ""}`}>
-                  {type.label}
-                </p>
-                <p className="text-[10px] md:text-[11px] text-muted-foreground mt-1 leading-tight hidden md:block">
-                  {type.description}
-                </p>
-              </motion.button>
-            ))}
+          {/* Date Picker */}
+          <div className="glass-strong rounded-2xl p-5 border border-border/50">
+            <h3 className="font-semibold text-sm mb-4 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" /> Select Preferred Date
+            </h3>
+            <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+              {dates.map((d) => (
+                <button
+                  key={d.key}
+                  onClick={() => setSelectedDate(d.key)}
+                  className={`flex-shrink-0 px-4 py-3 rounded-xl text-center text-xs transition-all duration-200 min-w-[75px] border-2 ${selectedDate === d.key
+                    ? "bg-primary text-white border-primary shadow-lg scale-105"
+                    : "glass border-border hover:border-primary/30"
+                    }`}
+                >
+                  <div className="font-bold">{d.label}</div>
+                  <div className="mt-1 text-[10px] opacity-80">{d.date}</div>
+                  {d.isToday && (
+                    <div className={`text-[8px] font-black mt-1 uppercase ${selectedDate === d.key ? "text-white/90" : "text-primary"}`}>
+                      Today
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Slot Picker */}
+          <div className="glass-strong rounded-2xl p-5 border border-border/50">
+            <h3 className="font-semibold text-sm mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" /> Select Preferred Slot
+            </h3>
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+              {slots.map((slot) => (
+                <button
+                  key={slot}
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`px-2 py-3 rounded-xl text-[10px] font-bold text-center border-2 transition-all duration-200 ${selectedSlot === slot
+                    ? "bg-primary text-white border-primary shadow-md scale-105"
+                    : "glass border-border hover:border-primary/30"
+                    }`}
+                >
+                  {slot}
+                </button>
+              ))}
+            </div>
           </div>
         </motion.div>
-
-        {/* ===== BOOKING DETAILS (based on type) ===== */}
-        <AnimatePresence mode="wait">
-          {bookingType === "instant" && (
-            <motion.div
-              key="instant"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-5 glass-strong rounded-2xl p-5 border-2 border-amber-500/20"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">Instant Booking</h4>
-                  <p className="text-xs text-muted-foreground">Service within 60 minutes</p>
-                </div>
-              </div>
-              <div className="bg-amber-500/10 rounded-xl p-4 text-center">
-                <p className="text-sm font-medium text-amber-600">🚀 A professional will be assigned immediately</p>
-                <p className="text-xs text-muted-foreground mt-1">Available professionals near you will be notified</p>
-              </div>
-            </motion.div>
-          )}
-
-          {bookingType === "prebook" && (
-            <motion.div
-              key="prebook"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-5 space-y-4"
-            >
-              {/* Date Selection */}
-              <div className="glass-strong rounded-2xl p-4 border-2 border-blue-500/20">
-                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-blue-500" /> Select Date
-                </h3>
-                <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-                  {dates.map((d) => (
-                    <button
-                      key={d.key}
-                      onClick={() => setSelectedDate(d.key)}
-                      className={`flex-shrink-0 px-4 py-3 rounded-xl text-center text-xs transition-all duration-200 min-w-[70px] ${selectedDate === d.key
-                        ? "bg-gradient-to-b from-blue-500 to-cyan-500 text-white shadow-lg"
-                        : "glass hover:border-blue-500/30"
-                        }`}
-                    >
-                      <div className="font-semibold">{d.label}</div>
-                      <div className="mt-1 text-[11px] opacity-80">{d.date}</div>
-                      {d.isToday && (
-                        <div className={`text-[9px] font-bold mt-0.5 ${selectedDate === d.key ? "text-white/90" : "text-blue-500"}`}>
-                          TODAY
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Time Slots */}
-              <div className="glass-strong rounded-2xl p-4 border-2 border-blue-500/20">
-                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-500" /> Select Time Slot
-                </h3>
-                <div className="grid grid-cols-4 gap-2">
-                  {slots.map((slot) => (
-                    <button
-                      key={slot}
-                      onClick={() => setSelectedSlot(slot)}
-                      className={`px-2 py-2.5 rounded-xl text-xs text-center transition-all duration-200 ${selectedSlot === slot
-                        ? "bg-gradient-to-b from-blue-500 to-cyan-500 text-white shadow-lg"
-                        : "glass hover:border-blue-500/30"
-                        }`}
-                    >
-                      {slot}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {bookingType === "customized" && (
-            <motion.div
-              key="customized"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-5 space-y-4"
-            >
-              {/* Custom Date */}
-              <div className="glass-strong rounded-2xl p-4 border-2 border-purple-500/20">
-                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-purple-500" /> Pick Your Date
-                </h3>
-                <input
-                  type="date"
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl bg-accent text-base focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-all appearance-none border border-border"
-                />
-              </div>
-
-              {/* Custom Time */}
-              <div className="glass-strong rounded-2xl p-4 border-2 border-purple-500/20">
-                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-purple-500" /> Pick Your Time
-                </h3>
-                <input
-                  type="time"
-                  onChange={(e) => setSelectedSlot(e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl bg-accent text-base focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-all appearance-none border border-border"
-                />
-              </div>
-
-              {/* Custom Notes */}
-              <div className="glass-strong rounded-2xl p-4 border-2 border-purple-500/20">
-                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Settings2 className="w-4 h-4 text-purple-500" /> Special Instructions
-                </h3>
-                <textarea
-                  placeholder="Any specific requirements, add-ons, or preferences..."
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl bg-accent text-base focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-all resize-none border border-border placeholder:text-muted-foreground"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* ===== STICKY BOTTOM BAR ===== */}
@@ -640,7 +537,7 @@ const ServiceDetail = () => {
               className={`px-4 md:px-6 gap-2 rounded-xl border-2 transition-all duration-300 ${addedToCart
                 ? "border-green-500 text-green-500 bg-green-500/10"
                 : "border-primary text-primary hover:bg-primary/10"
-                } ${bookingType !== "instant" && (!selectedDate || !selectedSlot) ? "opacity-50 grayscale" : ""}`}
+                } ${(!selectedDate || !selectedSlot) ? "opacity-30 grayscale pointer-events-none" : ""}`}
             >
               {addedToCart ? (
                 <>
@@ -657,18 +554,10 @@ const ServiceDetail = () => {
             {/* Continue / Book Now Button */}
             <Button
               onClick={handleBookingAction}
-              className="px-6 md:px-8 glow-primary rounded-xl gap-2"
-              disabled={bookingType !== "instant" && (!selectedDate || !selectedSlot)}
+              className="px-6 md:px-8 glow-primary rounded-xl gap-2 h-11"
+              disabled={(!selectedDate || !selectedSlot)}
             >
-              {bookingType === "instant" ? (
-                <>
-                  <Zap className="w-4 h-4" /> Book Now
-                </>
-              ) : (
-                <>
-                  Continue <ChevronRight className="w-4 h-4" />
-                </>
-              )}
+              SECURE SLOT <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -681,4 +570,3 @@ const ServiceDetail = () => {
 };
 
 export default ServiceDetail;
-

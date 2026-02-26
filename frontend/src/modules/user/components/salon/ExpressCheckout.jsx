@@ -10,7 +10,7 @@ import SlotSelectionModal from "./SlotSelectionModal";
 import { useNavigate } from "react-router-dom";
 
 const ExpressCheckout = () => {
-    const { cartItems, updateQuantity, clearCart, totalPrice, totalSavings, isCartOpen, setIsCartOpen, selectedSlot } = useCart();
+    const { cartItems, updateQuantity, clearCart, totalPrice, totalSavings, isCartOpen, setIsCartOpen, selectedSlot, getGroupedItems } = useCart();
     const { isLoggedIn, hasAddress, setIsLoginModalOpen, user } = useAuth();
     const { gender } = useGenderTheme();
     const navigate = useNavigate();
@@ -153,7 +153,9 @@ const ExpressCheckout = () => {
                                             <div>
                                                 <p className={`text-sm font-bold ${selectedSlot ? "text-green-900" : "text-purple-900"}`}>3. Booking Slot</p>
                                                 <p className={`text-[10px] ${selectedSlot ? "text-green-700" : "text-purple-700"}`}>
-                                                    {selectedSlot ? `${getFormattedDate(selectedSlot.date)} at ${selectedSlot.time}` : "Pick a date & time"}
+                                                    {selectedSlot
+                                                        ? `${getFormattedDate(selectedSlot.date)} at ${selectedSlot.time} (${selectedSlot.provider?.name || 'Trained Professional'})`
+                                                        : "Pick a date & time"}
                                                 </p>
                                             </div>
                                         </div>
@@ -190,50 +192,72 @@ const ExpressCheckout = () => {
                                 </div>
                             )}
 
-                            {/* Items Section */}
-                            <div>
-                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 ml-1">Services Added</h3>
-                                <div className="space-y-3">
-                                    {cartItems.map((item) => (
-                                        <div key={item.id} className="glass-strong rounded-2xl p-3 border border-border/50">
-                                            <div className="flex gap-4">
-                                                <div className="w-16 h-16 rounded-xl overflow-hidden bg-accent flex-shrink-0">
-                                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-xs truncate">{item.name}</h3>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="font-bold text-primary text-sm">₹{item.price}</span>
-                                                        <span className="text-[10px] text-muted-foreground bg-accent px-1.5 py-0.5 rounded">
-                                                            {item.duration}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between mt-2">
-                                                        <div className="flex items-center gap-3 bg-accent rounded-lg p-0.5">
-                                                            <button
-                                                                onClick={() => updateQuantity(item.id, -1)}
-                                                                className="w-6 h-6 rounded-md bg-background flex items-center justify-center shadow-sm"
-                                                            >
-                                                                <Minus className="w-3 h-3" />
-                                                            </button>
-                                                            <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
-                                                            <button
-                                                                onClick={() => updateQuantity(item.id, 1)}
-                                                                className="w-6 h-6 rounded-md bg-background flex items-center justify-center shadow-sm"
-                                                            >
-                                                                <Plus className="w-3 h-3" />
-                                                            </button>
-                                                        </div>
-                                                        <button onClick={() => updateQuantity(item.id, -item.quantity)} className="p-1.5 text-muted-foreground hover:text-destructive">
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                            {/* Grouped Items Section */}
+                            <div className="space-y-6 pb-4">
+                                {Object.entries(getGroupedItems()).map(([type, group]) => (
+                                    <div key={type} className="space-y-3">
+                                        <div className="flex items-center justify-between px-1">
+                                            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                                                {group.label}
+                                            </h3>
+                                            <span className="text-[10px] font-bold text-primary/60">
+                                                Subtotal: ₹{group.subtotal.toLocaleString()}
+                                            </span>
                                         </div>
-                                    ))}
-                                </div>
+
+                                        <div className="space-y-3">
+                                            {group.items.map((item) => (
+                                                <motion.div
+                                                    key={item.id}
+                                                    layout
+                                                    className="glass-strong rounded-2xl p-3 border border-border/50 hover:border-primary/20 transition-colors shadow-sm"
+                                                >
+                                                    <div className="flex gap-4">
+                                                        <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-accent flex-shrink-0 border border-border/50">
+                                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                                            <div>
+                                                                <h3 className="font-bold text-[13px] leading-tight text-foreground truncate">{item.name}</h3>
+                                                                <div className="flex items-center gap-2 mt-1.5">
+                                                                    <span className="font-black text-primary text-sm">₹{item.price.toLocaleString()}</span>
+                                                                    <span className="text-[9px] font-bold text-muted-foreground bg-accent/80 px-1.5 py-0.5 rounded leading-none">
+                                                                        {item.duration}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center justify-between mt-2">
+                                                                <div className="flex items-center gap-3 bg-accent/80 backdrop-blur-sm rounded-xl p-0.5 border border-border/50">
+                                                                    <button
+                                                                        onClick={() => updateQuantity(item.id, -1)}
+                                                                        className="w-7 h-7 rounded-lg bg-background flex items-center justify-center shadow-sm active:scale-95 transition-transform"
+                                                                    >
+                                                                        <Minus className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                    <span className="text-xs font-black w-4 text-center">{item.quantity}</span>
+                                                                    <button
+                                                                        onClick={() => updateQuantity(item.id, 1)}
+                                                                        className="w-7 h-7 rounded-lg bg-background flex items-center justify-center shadow-sm active:scale-95 transition-transform"
+                                                                    >
+                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => updateQuantity(item.id, -item.quantity)}
+                                                                    className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 

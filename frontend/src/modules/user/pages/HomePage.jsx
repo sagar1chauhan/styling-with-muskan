@@ -5,6 +5,9 @@ import BannerSlider from "@/modules/user/components/salon/BannerSlider";
 import CategoryGrid from "@/modules/user/components/salon/CategoryGrid";
 import PopularServices from "@/modules/user/components/salon/PopularServices";
 import WhyChooseUs from "@/modules/user/components/salon/WhyChooseUs";
+import SpotlightStories from "@/modules/user/components/salon/SpotlightStories";
+import OurGallery from "@/modules/user/components/salon/OurGallery";
+import Testimonials from "@/modules/user/components/salon/Testimonials";
 import BottomNav from "@/modules/user/components/salon/BottomNav";
 import FloatingCart from "@/modules/user/components/salon/FloatingCart";
 import ExpressCheckout from "@/modules/user/components/salon/ExpressCheckout";
@@ -26,8 +29,11 @@ const HomePage = () => {
           >
             <BannerSlider />
             <CategoryGrid />
+            <SpotlightStories />
             <PopularServices />
+            <OurGallery />
             <WhyChooseUs />
+            <Testimonials />
           </motion.div>
         </AnimatePresence>
       </main>
