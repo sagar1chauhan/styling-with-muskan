@@ -3,12 +3,12 @@ import { ShoppingBag, ChevronRight, Sparkles } from "lucide-react";
 import { useCart } from "@/modules/user/contexts/CartContext";
 import { useAuth } from "@/modules/user/contexts/AuthContext";
 
-const FloatingCart = () => {
-    const { cartItems, totalItems, totalPrice, setIsCartOpen } = useCart();
+const FloatingCart = ({ isVisible = true }) => {
+    const { cartItems, totalItems, totalPrice, setIsCartOpen, isCartOpen } = useCart();
     const { isLoggedIn } = useAuth();
 
-    // Only show if user is logged in AND has items
-    if (totalItems === 0 || !isLoggedIn) return null;
+    // Only show if user is logged in AND has items AND cart is not already open AND external isVisible is true
+    if (totalItems === 0 || !isLoggedIn || isCartOpen || !isVisible) return null;
 
     return (
         <AnimatePresence>

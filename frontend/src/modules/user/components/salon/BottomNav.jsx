@@ -23,7 +23,6 @@ const BottomNav = () => {
         };
         const active = isActive(tab.path);
         return (<button key={tab.label} onClick={() => navigate(tab.path)} className="flex flex-col items-center gap-1 relative">
-          {active && (<motion.div layoutId="bottomnav" className="absolute -top-0.5 w-8 h-0.5 bg-primary rounded-full" />)}
           <tab.icon className={`w-5 h-5 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`} />
           <span className={`text-[10px] ${active ? "text-primary font-medium" : "text-muted-foreground"}`}>{tab.label}</span>
         </button>);

@@ -1,21 +1,95 @@
-export const categories = [
-    { id: "bridal", name: "Bridal", icon: "💍", gender: "women", image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face" },
-    { id: "facial", name: "Facial", icon: "✨", gender: "women", image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=150&h=150&fit=crop&crop=face" },
-    { id: "waxing", name: "Waxing", icon: "🌿", gender: "women", image: "https://images.unsplash.com/photo-1540555700478-4be289fbec6d?w=150&h=150&fit=crop&crop=face" },
-    { id: "makeup", name: "Makeup", icon: "💄", gender: "women", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&h=150&fit=crop&crop=face" },
-    { id: "hairspa", name: "Hair Spa", icon: "💆‍♀️", gender: "women", image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150&h=150&fit=crop&crop=face" },
-    { id: "manicure", name: "Manicure", icon: "💅", gender: "women", image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=150&h=150&fit=crop" },
-    { id: "pedicure", name: "Pedicure", icon: "🦶", gender: "women", image: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=150&h=150&fit=crop" },
-    { id: "threading", name: "Threading", icon: "🪡", gender: "women", image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=150&h=150&fit=crop&crop=face" },
-    { id: "haircut-m", name: "Haircut", icon: "✂️", gender: "men", image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=150&h=150&fit=crop&crop=face" },
-    { id: "beard", name: "Beard Styling", icon: "🧔", gender: "men", image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=150&h=150&fit=crop" },
-    { id: "cleanup", name: "Cleanup", icon: "🧴", gender: "men", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" },
-    { id: "haircolor", name: "Hair Color", icon: "🎨", gender: "men", image: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=150&h=150&fit=crop&crop=face" },
-    { id: "grooming", name: "Grooming", icon: "💈", gender: "men", image: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=150&h=150&fit=crop&crop=face" },
-    { id: "facial-m", name: "Facial", icon: "🧖‍♂️", gender: "men", image: "https://images.unsplash.com/photo-1484517186945-df8151a1a871?w=150&h=150&fit=crop&crop=face" },
-    { id: "massage-m", name: "Massage", icon: "💪", gender: "men", image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=150&h=150&fit=crop" },
-    { id: "shave", name: "Clean Shave", icon: "🪒", gender: "men", image: "https://images.unsplash.com/photo-1585747860019-f4e64de5ad67?w=150&h=150&fit=crop&crop=face" },
+export const SERVICE_TYPES = [
+    {
+        id: "skin",
+        label: "Skin Care",
+        icon: "✨",
+        description: "Facials, waxing & cleanups",
+        color: "from-amber-400 to-orange-500",
+        textColor: "text-amber-600",
+        bgColor: "bg-amber-100"
+    },
+    {
+        id: "hair",
+        label: "Hair Services",
+        icon: "💇‍♀️",
+        description: "Cutting, spa & coloring",
+        color: "from-blue-400 to-indigo-500",
+        textColor: "text-blue-600",
+        bgColor: "bg-blue-100"
+    },
+    {
+        id: "makeup",
+        label: "Makeup & More",
+        icon: "💄",
+        description: "Party, bridal & grooming",
+        color: "from-pink-400 to-rose-500",
+        textColor: "text-pink-600",
+        bgColor: "bg-pink-100"
+    }
 ];
+
+export const BOOKING_TYPE_CONFIG = [
+    {
+        id: "instant",
+        label: "Instant Booking",
+        icon: "⚡",
+        description: "Pro reaches within 60 mins"
+    },
+    {
+        id: "scheduled",
+        label: "Pre-book Service",
+        icon: "📅",
+        description: "Choose your own date & time"
+    },
+    {
+        id: "customize",
+        label: "Custom Package",
+        icon: "✨",
+        description: "For events & bulk bookings"
+    }
+];
+
+export const categories = [
+    { id: "bridal", name: "Bridal", icon: "💍", gender: "women", serviceType: "makeup", bookingType: "instant", image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face" },
+    { id: "facial", name: "Facial", icon: "✨", gender: "women", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=150&h=150&fit=crop&crop=face" },
+    { id: "waxing", name: "Waxing", icon: "🌿", gender: "women", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1540555700478-4be289fbec6d?w=150&h=150&fit=crop&crop=face" },
+    { id: "makeup", name: "Makeup", icon: "💄", gender: "women", serviceType: "makeup", bookingType: "instant", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&h=150&fit=crop&crop=face" },
+    { id: "hairspa", name: "Hair Spa", icon: "💆‍♀️", gender: "women", serviceType: "hair", bookingType: "instant", image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150&h=150&fit=crop&crop=face" },
+    { id: "manicure", name: "Manicure", icon: "💅", gender: "women", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=150&h=150&fit=crop" },
+    { id: "pedicure", name: "Pedicure", icon: "🦶", gender: "women", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=150&h=150&fit=crop" },
+    { id: "threading", name: "Threading", icon: "🪡", gender: "women", serviceType: "makeup", bookingType: "instant", image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=150&h=150&fit=crop&crop=face" },
+
+    // Scheduled Categories (same IDs)
+    { id: "bridal", name: "Bridal", icon: "💍", gender: "women", serviceType: "makeup", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face" },
+    { id: "facial", name: "Facial", icon: "✨", gender: "women", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=150&h=150&fit=crop&crop=face" },
+    { id: "waxing", name: "Waxing", icon: "🌿", gender: "women", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1540555700478-4be289fbec6d?w=150&h=150&fit=crop&crop=face" },
+    { id: "makeup", name: "Makeup", icon: "💄", gender: "women", serviceType: "makeup", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150&h=150&fit=crop&crop=face" },
+    { id: "hairspa", name: "Hair Spa", icon: "💆‍♀️", gender: "women", serviceType: "hair", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150&h=150&fit=crop&crop=face" },
+    { id: "manicure", name: "Manicure", icon: "💅", gender: "women", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=150&h=150&fit=crop" },
+    { id: "pedicure", name: "Pedicure", icon: "🦶", gender: "women", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=150&h=150&fit=crop" },
+    { id: "threading", name: "Threading", icon: "🪡", gender: "women", serviceType: "makeup", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=150&h=150&fit=crop&crop=face" },
+
+    // Men Categories - Instant
+    { id: "haircut-m", name: "Haircut", icon: "✂️", gender: "men", serviceType: "hair", bookingType: "instant", image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=150&h=150&fit=crop&crop=face" },
+    { id: "beard", name: "Beard Styling", icon: "🧔", gender: "men", serviceType: "hair", bookingType: "instant", image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=150&h=150&fit=crop" },
+    { id: "cleanup", name: "Cleanup", icon: "🧴", gender: "men", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" },
+    { id: "haircolor", name: "Hair Color", icon: "🎨", gender: "men", serviceType: "hair", bookingType: "instant", image: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=150&h=150&fit=crop&crop=face" },
+    { id: "grooming", name: "Grooming", icon: "💈", gender: "men", serviceType: "hair", bookingType: "instant", image: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=150&h=150&fit=crop&crop=face" },
+    { id: "facial-m", name: "Facial", icon: "🧖‍♂️", gender: "men", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1484517186945-df8151a1a871?w=150&h=150&fit=crop&crop=face" },
+    { id: "massage-m", name: "Massage", icon: "💪", gender: "men", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=150&h=150&fit=crop" },
+    { id: "shave", name: "Clean Shave", icon: "🪒", gender: "men", serviceType: "skin", bookingType: "instant", image: "https://images.unsplash.com/photo-1585747860019-f4e64de5ad67?w=150&h=150&fit=crop&crop=face" },
+
+    // Men Categories - Scheduled
+    { id: "haircut-m", name: "Haircut", icon: "✂️", gender: "men", serviceType: "hair", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=150&h=150&fit=crop&crop=face" },
+    { id: "beard", name: "Beard Styling", icon: "🧔", gender: "men", serviceType: "hair", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=150&h=150&fit=crop" },
+    { id: "cleanup", name: "Cleanup", icon: "🧴", gender: "men", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" },
+    { id: "haircolor", name: "Hair Color", icon: "🎨", gender: "men", serviceType: "hair", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=150&h=150&fit=crop&crop=face" },
+    { id: "grooming", name: "Grooming", icon: "💈", gender: "men", serviceType: "hair", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=150&h=150&fit=crop&crop=face" },
+    { id: "facial-m", name: "Facial", icon: "🧖‍♂️", gender: "men", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1484517186945-df8151a1a871?w=150&h=150&fit=crop&crop=face" },
+    { id: "massage-m", name: "Massage", icon: "💪", gender: "men", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=150&h=150&fit=crop" },
+    { id: "shave", name: "Clean Shave", icon: "🪒", gender: "men", serviceType: "skin", bookingType: "scheduled", image: "https://images.unsplash.com/photo-1585747860019-f4e64de5ad67?w=150&h=150&fit=crop&crop=face" },
+];
+
 export const services = [
     {
         id: "s1", name: "Bridal Makeup Package", category: "bridal", gender: "women",
@@ -164,4 +238,45 @@ export const banners = {
         { id: 3, title: "Fresh Cut Friday", subtitle: "Flat 30% off on all haircuts", gradient: "from-zinc-800 via-gray-700 to-slate-800", image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&h=400&fit=crop", cta: "Get Offer" },
     ],
 };
-
+export const mockProviders = [
+    {
+        id: "p1",
+        name: "Muskan Sharma",
+        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
+        tag: "Best Rated",
+        rating: 4.9,
+        experience: "8+ Years",
+        totalJobs: 1250,
+        specialties: ["makeup", "skin", "hair"]
+    },
+    {
+        id: "p2",
+        name: "Priya Verma",
+        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
+        tag: "Top Choice",
+        rating: 4.8,
+        experience: "5+ Years",
+        totalJobs: 890,
+        specialties: ["skin", "makeup"]
+    },
+    {
+        id: "p3",
+        name: "Rahul Khanna",
+        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
+        tag: "Professional",
+        rating: 4.7,
+        experience: "6+ Years",
+        totalJobs: 750,
+        specialties: ["hair"]
+    },
+    {
+        id: "p4",
+        name: "Anjali Gupta",
+        image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&h=150&fit=crop",
+        tag: "Expert",
+        rating: 4.6,
+        experience: "4+ Years",
+        totalJobs: 420,
+        specialties: ["skin", "hair"]
+    }
+];

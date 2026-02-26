@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
     ArrowLeft, ShieldCheck, CreditCard, Wallet,
     Smartphone, Landmark, CheckCircle2, ChevronRight,
@@ -14,6 +14,8 @@ import { Button } from "@/modules/user/components/ui/button";
 
 const PaymentPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const passedState = location.state;
     const { gender } = useGenderTheme();
     const { cartItems, totalPrice, totalSavings, selectedSlot, clearCart } = useCart();
     const { user } = useAuth();
@@ -23,8 +25,8 @@ const PaymentPage = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
-    // Calculate final total (including a small logic for mockup discount if any)
-    const finalTotal = totalPrice;
+    // Calculate final total (including state from summary)
+    const finalTotal = passedState?.finalTotal || totalPrice;
 
     const paymentMethods = [
         { id: "upi", name: "UPI (GPay, PhonePe, Paytm)", icon: Smartphone, color: "text-purple-600", bg: "bg-purple-100" },
@@ -34,21 +36,32 @@ const PaymentPage = () => {
         { id: "cod", name: "Pay After Service", icon: ShieldCheck, color: "text-primary", bg: "bg-primary/10" }
     ];
 
+
     const handlePayment = () => {
         setIsProcessing(true);
+
+        const isHighValue = cartItems.some(item =>
+            item.name.toLowerCase().includes("bridal") ||
+            item.name.toLowerCase().includes("party makeup") ||
+            item.price >= 3000
+        );
+
+        const advanceAmount = isHighValue ? Math.round((finalTotal * 0.3)) : 0;
 
         // Simulate payment process
         setTimeout(() => {
             const bookingData = {
-                serviceName: cartItems[0]?.name + (cartItems.length > 1 ? ` +${cartItems.length - 1} more` : ""),
-                services: cartItems,
-                date: new Date(selectedSlot?.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', weekday: 'short' }) || "Today",
-                time: selectedSlot?.time || "Immediate",
-                price: finalTotal,
-                image: cartItems[0]?.image,
-                address: user?.address ? `${user.address.type} - ${user.address.houseNo}, ${user.address.area}` : "N/A",
+                items: cartItems,
+                totalAmount: finalTotal,
+                savings: totalSavings + (passedState?.discount || 0),
+                bookingType: selectedSlot?.bookingType || "prebook",
+                slot: selectedSlot,
+                address: user?.address,
                 paymentMethod: selectedMethod,
-                bookingType: selectedSlot?.type || "Standard"
+                paymentStatus: selectedMethod === 'cod' ? "Pay after service" : (isHighValue ? "Partially Paid" : "Paid"),
+                prepaidAmount: selectedMethod === 'cod' ? 0 : (isHighValue ? advanceAmount : finalTotal),
+                balanceAmount: selectedMethod === 'cod' ? finalTotal : (isHighValue ? finalTotal - advanceAmount : 0),
+                status: "Pending"
             };
 
             addBooking(bookingData);
@@ -149,8 +162,8 @@ const PaymentPage = () => {
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setSelectedMethod(method.id)}
                             className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-300 ${selectedMethod === method.id
-                                    ? "bg-primary/5 border-primary shadow-lg shadow-primary/5"
-                                    : "bg-accent/40 border-transparent hover:border-border"
+                                ? "bg-primary/5 border-primary shadow-lg shadow-primary/5"
+                                : "bg-accent/40 border-transparent hover:border-border"
                                 }`}
                         >
                             <div className="flex items-center gap-4">

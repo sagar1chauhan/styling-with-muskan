@@ -12,7 +12,7 @@ import { useBookings } from "@/modules/user/contexts/BookingContext";
 const BookingSummary = () => {
   const navigate = useNavigate();
   const { gender } = useGenderTheme();
-  const { cartItems, totalPrice, totalSavings, selectedSlot, clearCart } = useCart();
+  const { cartItems, updateQuantity, clearCart, totalPrice, totalSavings, isCartOpen, setIsCartOpen, selectedSlot, getGroupedItems } = useCart();
   const { user } = useAuth();
   const { addBooking } = useBookings();
 
@@ -24,7 +24,13 @@ const BookingSummary = () => {
   const finalTotal = totalPrice - discount;
 
   const handlePay = () => {
-    navigate("/payment");
+    navigate("/payment", {
+      state: {
+        discount,
+        finalTotal,
+        totalSavings
+      }
+    });
   };
 
   const getFormattedDate = (dateStr) => {
@@ -124,37 +130,60 @@ const BookingSummary = () => {
               <Clock className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Timing</p>
-              <p className="text-sm font-bold mt-1 text-primary">{selectedSlot?.time}</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Timing & Professional</p>
+              <p className="text-sm font-bold mt-1 text-primary">
+                {selectedSlot?.time}
+                <span className="block text-[10px] text-muted-foreground mt-0.5">By {selectedSlot?.provider?.name || 'Trained Professional'}</span>
+              </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Services */}
-        <div className="space-y-3">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Cart Items</h3>
-          {cartItems.map((item, idx) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 + idx * 0.05 }}
-              className="glass-strong rounded-2xl p-4 border border-border/50"
-            >
-              <div className="flex items-center gap-4">
-                <img src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-cover" />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-sm truncate">{item.name}</h3>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Quantity: {item.quantity} · {item.duration}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-primary text-sm">₹{(item.price * item.quantity).toLocaleString()}</p>
-                  {item.originalPrice && (
-                    <p className="text-[9px] text-muted-foreground line-through opacity-60">₹{(item.originalPrice * item.quantity).toLocaleString()}</p>
-                  )}
-                </div>
+        {/* Grouped Services */}
+        <div className="space-y-6">
+          {Object.entries(getGroupedItems()).map(([type, group]) => (
+            <div key={type} className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                  {group.label}
+                </h3>
+                <span className="text-[10px] font-bold text-primary/60">
+                  Section Subtotal: ₹{group.subtotal.toLocaleString()}
+                </span>
               </div>
-            </motion.div>
+
+              <div className="space-y-3">
+                {group.items.map((item, idx) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 + idx * 0.05 }}
+                    className="glass-strong rounded-2xl p-4 border border-border/50 shadow-sm"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-accent flex-shrink-0 border border-border/50">
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-sm text-foreground truncate">{item.name}</h3>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">
+                          Quantity: {item.quantity} · {item.duration}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-black text-primary text-sm">₹{(item.price * item.quantity).toLocaleString()}</p>
+                        {item.originalPrice && (
+                          <p className="text-[9px] text-muted-foreground line-through opacity-60">
+                            ₹{(item.originalPrice * item.quantity).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
 

@@ -25,7 +25,7 @@ export const BookingProvider = ({ children }) => {
             {
                 ...newBooking,
                 id: `B${Date.now()}`,
-                status: "Upcoming",
+                status: "Pending",
                 createdAt: new Date().toISOString()
             },
             ...prev
